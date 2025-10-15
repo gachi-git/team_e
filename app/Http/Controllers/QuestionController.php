@@ -4,9 +4,16 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Question;
+use Illuminate\Support\Facades\Auth;
 
 class QuestionController extends Controller
 {
+    public function index()
+    {
+        $questions = Question::latest()->get();
+        return view('questions.index', compact('questions'));
+    }
+
     public function create()
     {
         return view('questions.create');
@@ -28,7 +35,7 @@ class QuestionController extends Controller
         ]);
 
         // 投稿後にリダイレクト
-        return redirect()->route('questions.create')->with('success', '質問を投稿しました！');
+        return redirect()->route('questions.index')->with('success', '質問を投稿しました！');
     }
 }
 
