@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Question;
@@ -24,12 +25,19 @@ class QuestionController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title' => ['required','max:255'],
+            'title' => ['required', 'max:255'],
             'body'  => ['required'],
         ]);
 
         Question::create($data);
 
         return redirect()->route('questions.index')->with('status', '質問を投稿しました。');
+    }
+
+    
+    public function show($id)
+    {
+        $question = Question::with('user')->findOrFail($id);
+        return view('questions.show', compact('question'));
     }
 }
