@@ -9,10 +9,19 @@ use Illuminate\Http\Request;
 class QuestionController extends Controller
 {
     // 一覧表示
-    public function index()
-    {
-        $questions = Question::latest()->paginate(10);
-        return view('index', compact('questions'));
+    public function index(Request $_request)
+    {   
+        $keyword = $_request->input('keyword');
+
+        $query = Question::query();
+
+        if (! empty($keyword)) {
+            $query->where('title', 'like', "%{$keyword}%")
+                  ->orWhere('body', 'like', "%{$keyword}%");
+        }
+        $questions = $query->latest()->paginate(10);
+
+        return view('index', compact('questions', 'keyword'));
     }
 
     // 作成フォーム表示
