@@ -9,6 +9,18 @@
                 {{ $question->title }}
             </h1>
 
+            @if($question->tags && $question->tags->isNotEmpty())
+                <div class="mb-4 flex flex-wrap gap-2">
+                    @foreach ($question->tags as $tag)
+                        <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                    bg-indigo-50 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-200">
+                            #{{ $tag->label }}
+                        </span>
+                    @endforeach
+                </div>
+            @endif
+
             <p class="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
                 {!! nl2br(e($question->body)) !!}
             </p>
@@ -20,7 +32,7 @@
 
             <div class="mt-6">
                 <a href="{{ route('questions.index') }}"
-                   class="inline-block px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:bg-gray-700 dark:text-indigo-300 dark:hover:bg-gray-600 rounded-xl transition">
+                    class="inline-block px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 hover:bg-indigo-100 dark:bg-gray-700 dark:text-indigo-300 dark:hover:bg-gray-600 rounded-xl transition">
                     ← 質問一覧に戻る
                 </a>
             </div>
