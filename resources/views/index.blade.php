@@ -23,6 +23,25 @@
                 </a>
             </div>
 
+            <form action="{{ route('questions.index') }}" method="GET" class="mb-6 flex gap-2">
+              <input
+                type="text"
+                name="keyword"
+                value="{{ $keyword ?? '' }}"
+                placeholder="キーワードで検索してみよう"
+                class="border border-gray-300 rounded-lg p-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 text-gray-800 bg-white placeholder-gray-400"
+
+
+                >
+                <button
+                 type="submit"
+                 class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                >
+                 検索
+                </button>
+            </form>
+
+
             <!-- 質問一覧 -->
             <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 @forelse ($questions as $question)
