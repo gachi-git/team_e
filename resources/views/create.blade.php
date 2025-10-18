@@ -1,34 +1,67 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-900 dark:text-gray-100">質問する</h2>
+        <h2 class="font-semibold text-xl text-gray-900 dark:text-gray-100">
+            質問を投稿する
+        </h2>
     </x-slot>
 
-    <div class="py-6">
-        <div class="max-w-3xl mx-auto px-4">
-            <form method="POST" action="{{ route('questions.store') }}" class="bg-white p-6 rounded shadow">
+    <main class="flex justify-center items-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <div class="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-8">
+            <!-- タイトル -->
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-6 text-center">
+                新しい質問を投稿
+            </h1>
+
+            <!-- 投稿フォーム -->
+            <form method="POST" action="{{ route('questions.store') }}" class="space-y-6">
                 @csrf
 
+                <!-- タイトル入力 -->
                 <div>
-                    <label class="block font-medium mb-1">タイトル</label>
-                    <input name="title" value="{{ old('title') }}" class="w-full border rounded p-2" />
+                    <label for="title" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        タイトル
+                    </label>
+                    <input
+                        id="title"
+                        name="title"
+                        type="text"
+                        required
+                        class="mt-1 block w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="例：Laravelでバリデーションを実装するには？"
+                        value="{{ old('title') }}"
+                    >
                     @error('title')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <div class="mt-4">
-                    <label class="block font-medium mb-1">内容</label>
-                    <textarea name="body" rows="6" class="w-full border rounded p-2">{{ old('body') }}</textarea>
+                <!-- 内容入力 -->
+                <div>
+                    <label for="body" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        内容
+                    </label>
+                    <textarea
+                        id="body"
+                        name="body"
+                        rows="6"
+                        required
+                        class="mt-1 block w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="質問内容を具体的に書いてください。">{{ old('body') }}</textarea>
                     @error('body')
-                        <p class="text-red-600 text-sm mt-1">{{ $message }}</p>
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
                     @enderror
                 </div>
 
-                <div class="mt-6 flex gap-3">
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">投稿する</button>
-                    <a href="{{ route('questions.index') }}" class="px-4 py-2 bg-gray-200 rounded">一覧へ戻る</a>
+                <!-- 投稿ボタン -->
+                <div class="flex justify-center">
+                    <button
+                        type="submit"
+                        class="w-full sm:w-auto inline-flex justify-center px-6 py-3 border border-transparent text-base font-medium rounded-xl shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition"
+                    >
+                        投稿する
+                    </button>
                 </div>
             </form>
         </div>
-    </div>
+    </main>
 </x-app-layout>
