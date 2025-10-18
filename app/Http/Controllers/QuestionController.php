@@ -2,40 +2,42 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Question;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
+
 
 class QuestionController extends Controller
 {
+    // 一覧表示
     public function index()
     {
-        $questions = Question::latest()->get();
-        return view('questions.index', compact('questions'));
+        $questions = Question::latest()->paginate(10);
+        return view('index', compact('questions'));
     }
 
+    // 作成フォーム表示
     public function create()
     {
-        return view('questions.create');
+        return view('create');
     }
 
+    // 保存して一覧へ戻す
     public function store(Request $request)
     {
-        // バリデーション
-        $validated = $request->validate([
-            'title' => 'required|max:100',
-            'body' => 'required',
+        $data = $request->validate([
+            'title' => ['required', 'max:255'],
+            'body'  => ['required'],
         ]);
 
-        // データ保存
-        Question::create([
-            'title' => $validated['title'],
-            'body' => $validated['body'],
-            'user_id' => auth()->id(), // ログインユーザー
-        ]);
+        Question::create($data);
 
-        // 投稿後にリダイレクト
-        return redirect()->route('questions.index')->with('success', '質問を投稿しました！');
+        return redirect()->route('questions.index')->with('status', '質問を投稿しました。');
+    }
+
+    
+    public function show($id)
+    {
+        $question = Question::with('user')->findOrFail($id);
+        return view('questions.show', compact('question'));
     }
 }
-

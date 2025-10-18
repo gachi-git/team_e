@@ -15,12 +15,11 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('questions.index')" :active="request()->routeIs('questions.index')">
-                        {{ __('質問一覧') }}
-                    </x-nav-link>
-
                     <x-nav-link :href="route('questions.create')" :active="request()->routeIs('questions.create')">
-                        {{ __('質問投稿') }}
+                        質問する
+                    </x-nav-link>
+                    <x-nav-link :href="route('questions.index')" :active="request()->routeIs('questions.index')">
+                        質問一覧
                     </x-nav-link>
                 </div>
             </div>
@@ -76,6 +75,16 @@
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+
+            {{-- ▼ 追加（レスポンシブ）：質問一覧 --}}
+            <x-responsive-nav-link :href="route('questions.index')" :active="request()->routeIs('questions.index')">
+                質問一覧
+            </x-responsive-nav-link>
+
+            {{-- ▼ 追加（レスポンシブ）：質問する --}}
+            <x-responsive-nav-link :href="route('questions.create')" :active="request()->routeIs('questions.create')">
+                質問する
             </x-responsive-nav-link>
         </div>
 
