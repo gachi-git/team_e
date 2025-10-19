@@ -45,12 +45,21 @@
                 @forelse ($questions as $question)
                     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-xl transition p-6 flex flex-col justify-between">
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2">
-                                <a href="{{ route('questions.show', $question) }}"
-                                   class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">
-                                    {{ $question->title }}
-                                </a>
-                            </h2>
+                            {{-- ✅ タイトル行に「解決済み」バッジを追加 --}}
+                            <div class="flex items-center justify-between mb-2">
+                                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 line-clamp-2">
+                                    <a href="{{ route('questions.show', $question) }}"
+                                       class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                                        {{ $question->title }}
+                                    </a>
+                                </h2>
+
+                                @if($question->best_answer_id)
+                                    <span class="inline-flex items-center text-xs font-semibold text-green-700 bg-green-100 dark:bg-green-900/40 dark:text-green-300 px-2.5 py-0.5 rounded-full">
+                                        ✅ 解決済み
+                                    </span>
+                                @endif
+                            </div>
 
                             <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-3 mb-4">
                                 {{ Str::limit(strip_tags($question->body), 120) }}
