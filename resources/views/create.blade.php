@@ -52,6 +52,27 @@
                     @enderror
                 </div>
 
+                <!-- ハッシュタグ（任意） -->
+                <div>
+                    <label for="hashtags" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                        ハッシュタグ（任意）
+                    </label>
+                    <input
+                        id="hashtags"
+                        name="hashtags"
+                        type="text"
+                        class="mt-1 block w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="#○○大学 #◻︎部 など（カンマ/空白区切りも可）"
+                        value="{{ old('hashtags') }}"
+                    >
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                        例）<code>#九州大学 #理学部</code> または <code>九州大学, 理学部</code>
+                    </p>
+                    @error('hashtags')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
                 <!-- 投稿ボタン -->
                 <div class="flex justify-center">
                     <button
