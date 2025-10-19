@@ -1,0 +1,68 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Question;
+use Illuminate\Http\Request;
+use App\Models\Answer;
+
+
+class QuestionController extends Controller
+{
+    // 一覧表示
+    public function index(Request $_request)
+    {
+        $keyword = $_request->input('keyword');
+
+        $query = Question::query();
+
+        if (! empty($keyword)) {
+            $query->where('title', 'like', "%{$keyword}%")
+                ->orWhere('body', 'like', "%{$keyword}%");
+        }
+        $questions = $query->latest()->paginate(10);
+
+        return view('index', compact('questions', 'keyword'));
+    }
+
+    // 作成フォーム表示
+    public function create()
+    {
+        return view('create');
+    }
+
+    // 保存して一覧へ戻す
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'title' => ['required', 'max:255'],
+            'body'  => ['required'],
+        ]);
+
+        Question::create($data);
+
+        return redirect()->route('questions.index')->with('status', '質問を投稿しました。');
+    }
+
+
+    public function show($id)
+    {
+        $question = Question::with('answers')->findOrFail($id);
+        return view('questions.show', compact('question'));
+    }
+
+    public function storeAnswer(Request $request, $questionId)
+    {
+        $request->validate([
+            'body' => 'required',
+        ]);
+
+        Answer::create([
+            'body' => $request->body,
+            'question_id' => $questionId,
+        ]);
+
+        return redirect()->route('questions.show', $questionId)
+            ->with('status', '回答を投稿しました。');
+    }
+}
