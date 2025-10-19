@@ -11,20 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('answers', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('question_id')->constrained()->onDelete('cascade');
-            $table->text('body');
-            $table->timestamps();
+        Schema::table('universities', function (Blueprint $table) {
+            //
         });
     }
-
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        Schema::dropIfExists('answers');
+        Schema::table('universities', function (Blueprint $table) {
+            //
+        });
     }
 };
