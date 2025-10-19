@@ -1,8 +1,9 @@
 <?php
 
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UniversityController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\QuestionController;
-use App\Http\Controllers\ProfileController;
 
 Route::get('/', function(){
     return view('welcome');
@@ -15,6 +16,9 @@ Route::get('/dashboard', function () {
 
 
 Route::resource('questions', QuestionController::class)->only(['index','create','store']);
+
+// Public API - accessible without authentication
+Route::get('/api/universities/search', [UniversityController::class, 'search'])->name('universities.search');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/questions/create', [QuestionController::class, 'create'])->name('questions.create');

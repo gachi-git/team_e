@@ -47,6 +47,16 @@
             @endif
         </div>
 
+        <div>
+            <x-input-label for="university_id" value="大学" />
+            <x-university-select 
+                name="university_id" 
+                :value="old('university_id', $user->university_id)"
+                :selected="$user->university" 
+            />
+            <x-input-error class="mt-2" :messages="$errors->get('university_id')" />
+        </div>
+
         <div class="flex items-center gap-4">
             <x-primary-button>{{ __('Save') }}</x-primary-button>
 

@@ -16,6 +16,16 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
+        <!-- University -->
+        <div class="mt-4">
+            <x-input-label for="university_id" value="大学（任意）" />
+            <x-university-select 
+                name="university_id" 
+                :value="old('university_id')"
+            />
+            <x-input-error :messages="$errors->get('university_id')" class="mt-2" />
+        </div>
+
         <!-- Password -->
         <div class="mt-4">
             <x-input-label for="password" :value="__('Password')" />
