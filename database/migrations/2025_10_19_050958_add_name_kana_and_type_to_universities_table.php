@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('universities', function (Blueprint $table) {
-            //
+            $table->string('name_kana')->nullable()->after('name');
+            $table->enum('type', ['国立', '公立', '私立'])->nullable()->after('name_kana');
         });
     }
 
@@ -22,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('universities', function (Blueprint $table) {
-            //
+            $table->dropColumn(['name_kana', 'type']);
         });
     }
 };

@@ -17,7 +17,7 @@
             @blur="setTimeout(() => open = false, 200)"
             @keydown.arrow-down.prevent="highlightNext()"
             @keydown.arrow-up.prevent="highlightPrev()"
-            @keydown.enter.prevent="selectHighlighted()"
+            @keydown.enter.prevent=""
             @keydown.escape="closeDropdown()"
             class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
             placeholder="大学を検索..."
@@ -64,7 +64,11 @@
                 role="option"
                 :aria-selected="index === highlightedIndex"
             >
-                <div x-text="university.name" class="font-medium"></div>
+                <div>
+                    <div x-text="university.name" class="font-medium"></div>
+                    <div x-text="university.name_kana" class="text-sm text-gray-500 dark:text-gray-400"></div>
+                </div>
+                <span x-text="university.type" class="text-sm px-2 py-1 rounded bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"></span>
             </div>
         </template>
         
@@ -123,11 +127,6 @@ function universitySelect(initialValue = null, initialSelected = null) {
             this.highlightedIndex = -1;
         },
         
-        selectHighlighted() {
-            if (this.highlightedIndex >= 0 && this.universities[this.highlightedIndex]) {
-                this.selectUniversity(this.universities[this.highlightedIndex]);
-            }
-        },
         
         highlightNext() {
             if (this.universities.length === 0) return;

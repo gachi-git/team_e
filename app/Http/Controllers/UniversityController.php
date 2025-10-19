@@ -13,9 +13,10 @@ class UniversityController extends Controller
         
         return University::query()
             ->when($query, function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%");
+                $q->where('name', 'like', "%{$query}%")
+                  ->orWhere('name_kana', 'like', "%{$query}%");
             })
             ->orderBy('name')
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'name_kana', 'type']);
     }
 }
