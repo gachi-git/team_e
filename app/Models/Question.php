@@ -38,4 +38,12 @@ class Question extends Model
         // 中間テーブルが question_tag の場合
         return $this->belongsToMany(Tag::class, 'question_tag');
     }
+
+    /**
+     * ベストアンサー（1件）
+     */
+    public function bestAnswer(): BelongsTo
+    {
+        return $this->belongsTo(Answer::class, 'best_answer_id');
+    }
 }
