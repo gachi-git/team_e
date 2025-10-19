@@ -5,6 +5,7 @@ use App\Http\Controllers\UniversityController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\QuestionController;
 
+
 Route::get('/', function(){
     return view('welcome');
 });
@@ -35,5 +36,10 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/questions/{question}', [QuestionController::class, 'show'])->name('questions.show');
 Route::post('/questions/{question}/answers', [QuestionController::class, 'storeAnswer'])->name('answers.store');
+
+Route::post(
+    '/questions/{question}/answers/{answer}/best',
+    [QuestionController::class, 'markBestAnswer']
+)->middleware('auth')->name('answers.best');
 
 require __DIR__.'/auth.php';
