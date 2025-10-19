@@ -8,7 +8,7 @@
     <div class="max-w-3xl mx-auto p-6 space-y-8">
 
         {{-- 質問カード --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-6">
+        <div class="bg-white dark:bg-gray-700 shadow-md rounded-2xl p-6">
             <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 {{ $question->title }}
             </h1>
@@ -56,7 +56,7 @@
 
 
         {{-- 回答投稿（トグル1つだけ） --}}
-        <div x-data="{ open: false }" class="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-6">
+        <div x-data="{ open: false }" class="bg-white dark:bg-gray-700 shadow-md rounded-2xl p-6">
             <button
                 @click="open = !open"
                 class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
@@ -82,22 +82,46 @@
             </div>
         </div>
 
-        {{-- 回答一覧（1回だけ） --}}
-        <div class="bg-white dark:bg-gray-800 shadow-md rounded-2xl p-6 space-y-4">
+        {{-- ✅ 回答一覧（ここに追加変更） --}}
+        <div class="bg-white dark:bg-gray-700 shadow-md rounded-2xl p-6 space-y-4">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">回答一覧</h2>
 
             @forelse ($question->answers as $answer)
-            <div class="border-b border-gray-200 dark:border-gray-700 pb-4 mb-4">
-                <p class="text-gray-800 dark:text-gray-200 whitespace-pre-line">{{ $answer->body }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                    投稿日時: {{ $answer->created_at->format('Y-m-d H:i') }}
-                    @if($answer->relationLoaded('user') && $answer->user)
-                    ／ 投稿者: {{ $answer->user->name }}
+                <div class="p-4 mb-4 bg-white dark:bg-gray-800 rounded-2xl shadow transition hover:shadow-lg">
+                    <p class="text-gray-900 dark:text-gray-100 whitespace-pre-line">{{ $answer->body }}</p>
+                    <p class="text-sm text-gray-500 mt-2">
+                        投稿日時: {{ $answer->created_at->format('Y/m/d H:i') }}
+                        @if($answer->relationLoaded('user') && $answer->user)
+                            ／ 投稿者: {{ $answer->user->name }}
+                        @endif
+                    </p>
+
+                    {{-- ✅ ベストアンサー装飾 --}}
+                    @if($question->best_answer_id === $answer->id)
+                        <div class="mt-3 inline-block bg-green-100 text-green-800 text-sm font-semibold px-3 py-1 rounded-full">
+                            🌟 ベストアンサー
+                        </div>
                     @endif
-                </p>
-            </div>
+
+                    {{-- ✅ 投稿者だけが押せるボタン --}}
+                    @if(Auth::check() && Auth::id() === $question->user_id && $question->best_answer_id === null)
+                        <form method="POST"
+                            action="{{ route('answers.best', ['question' => $question->id, 'answer' => $answer->id]) }}"
+                            class="mt-3"
+                            x-data="{ loading: false }"
+                            @submit="loading = true">
+                            @csrf
+                            <button type="submit"
+                                x-bind:disabled="loading"
+                                class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-lg shadow transition">
+                                <span x-show="!loading">ベストアンサーにする</span>
+                                <span x-show="loading" class="animate-pulse">処理中...</span>
+                            </button>
+                        </form>
+                    @endif
+                </div>
             @empty
-            <p class="text-gray-600 dark:text-gray-400">まだ回答がありません。</p>
+                <p class="text-gray-600 dark:text-gray-400">まだ回答がありません。</p>
             @endforelse
         </div>
 
