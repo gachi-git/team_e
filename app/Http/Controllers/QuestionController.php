@@ -5,9 +5,13 @@ use App\Models\Question;
 use App\Models\Tag;
 use App\Models\Answer;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class QuestionController extends Controller
 {
+
+    use AuthorizesRequests;
+
     public function index(Request $_request)
     {
         $keyword = $_request->input('keyword');
@@ -144,4 +148,38 @@ class QuestionController extends Controller
         return redirect()->route('questions.show', $questionId)
             ->with('status', '回答を投稿しました。');
     }
+
+    // 編集画面表示
+    public function edit(Question $question)
+    { 
+       $this->authorize('update', $question); // ポリシーで本人確認
+       return view('questions.edit', compact('question'));
+    }
+
+    // 更新処理
+    public function update(Request $request, Question $question)
+    {
+       $this->authorize('update', $question);
+
+       $request->validate([
+        'title' => 'required|string|max:255',
+        'body' => 'required|string',
+       ]);
+
+       $question->update($request->only('title', 'body'));
+
+        return redirect()->route('questions.show', $question)->with('success', '質問を更新しました');
+    }
+
+    // 削除処理
+    public function destroy(Question $question)
+    {
+       $this->authorize('delete', $question);
+
+       $question->delete();
+
+       return redirect()->route('questions.index')->with('success', '質問を削除しました');
+    }
+
+
 }
