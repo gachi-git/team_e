@@ -27,6 +27,6 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::get('/questions/{question}', [QuestionController::class, 'show'])->name('questions.show');
-
+Route::post('/questions/{question}/answers', [QuestionController::class, 'storeAnswer'])->name('answers.store');
 
 require __DIR__.'/auth.php';
