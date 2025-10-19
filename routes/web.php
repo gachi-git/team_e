@@ -17,6 +17,9 @@ Route::get('/dashboard', function () {
 
 Route::resource('questions', QuestionController::class)->only(['index','create','store']);
 
+// Public API - accessible without authentication
+Route::get('/api/universities/search', [UniversityController::class, 'search'])->name('universities.search');
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/questions/create', [QuestionController::class, 'create'])->name('questions.create');
     Route::post('/questions', [QuestionController::class, 'store'])->name('questions.store');
@@ -25,8 +28,6 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    
-    Route::get('/api/universities/search', [UniversityController::class, 'search'])->name('universities.search');
 });
 
 Route::get('/questions/{question}', [QuestionController::class, 'show'])->name('questions.show');

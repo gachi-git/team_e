@@ -1,6 +1,6 @@
 @props(['name' => 'university_id', 'value' => null, 'selected' => null])
 
-<div x-data="universitySelect(@js($value), @js($selected))" class="relative">
+<div x-data="universitySelect(@js($value), @js($selected))" class="space-y-3">
     <input 
         type="hidden" 
         name="{{ $name }}" 
@@ -8,19 +8,36 @@
         :value="selectedUniversity?.id || ''"
     >
     
+    <!-- 大学区分選択 -->
+    <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">大学区分</label>
+        <select 
+            x-model="selectedType"
+            @change="search()"
+            class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+        >
+            <option value="">すべて</option>
+            <option value="国立">国立大学</option>
+            <option value="公立">公立大学</option>
+            <option value="私立">私立大学</option>
+        </select>
+    </div>
+    
+    <!-- 大学名検索 -->
     <div class="relative">
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">大学名</label>
         <input 
             type="text"
             x-model="query"
             @input.debounce.300ms="search()"
-            @focus="open = true; if(query.length > 0) search()"
+            @focus="open = true; search()"
             @blur="setTimeout(() => open = false, 200)"
             @keydown.arrow-down.prevent="highlightNext()"
             @keydown.arrow-up.prevent="highlightPrev()"
             @keydown.enter.prevent=""
             @keydown.escape="closeDropdown()"
-            class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-            placeholder="大学を検索..."
+            class="block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+            placeholder="大学名を検索..."
             autocomplete="off"
             role="combobox"
             aria-expanded="false"
@@ -48,7 +65,7 @@
         x-transition:leave="transition ease-in duration-75"
         x-transition:leave-start="transform opacity-100 scale-100"
         x-transition:leave-end="transform opacity-0 scale-95"
-        class="absolute z-50 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto"
+        class="absolute z-50 w-96 mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto"
         role="listbox"
     >
         <template x-for="(university, index) in universities" :key="university.id">
@@ -76,12 +93,12 @@
             検索中...
         </div>
         
-        <div x-show="!loading && universities.length === 0 && query.length > 0" class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
+        <div x-show="!loading && universities.length === 0 && (query.length > 0 || selectedType)" class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
             該当する大学が見つかりません
         </div>
         
-        <div x-show="!loading && universities.length === 0 && query.length === 0" class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
-            大学名を入力してください
+        <div x-show="!loading && universities.length === 0 && query.length === 0 && !selectedType" class="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
+            大学区分を選択するか、大学名を入力してください
         </div>
     </div>
 </div>
@@ -91,20 +108,26 @@ function universitySelect(initialValue = null, initialSelected = null) {
     return {
         open: false,
         query: initialSelected?.name || '',
+        selectedType: '',
         universities: [],
         selectedUniversity: initialSelected,
         highlightedIndex: -1,
         loading: false,
         
         async search() {
-            if (this.query.length < 1) {
-                this.universities = [];
-                return;
-            }
-            
             this.loading = true;
             try {
-                const response = await fetch(`/api/universities/search?q=${encodeURIComponent(this.query)}`);
+                let url = '/api/universities/search?';
+                const params = new URLSearchParams();
+                
+                if (this.query.length > 0) {
+                    params.append('q', this.query);
+                }
+                if (this.selectedType) {
+                    params.append('type', this.selectedType);
+                }
+                
+                const response = await fetch(url + params.toString());
                 if (response.ok) {
                     this.universities = await response.json();
                     this.highlightedIndex = this.universities.length > 0 ? 0 : -1;
