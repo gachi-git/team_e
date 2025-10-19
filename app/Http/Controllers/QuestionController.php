@@ -5,7 +5,6 @@ use App\Models\Question;
 use App\Models\Tag;
 use App\Models\Answer;
 use Illuminate\Http\Request;
-use App\Models\Answer;
 
 class QuestionController extends Controller
 {
@@ -30,22 +29,6 @@ class QuestionController extends Controller
     public function create()
     {
         return view('create');
-    }
-
-
-    public function storeAnswer(Request $request, $questionId)
-    {
-        $request->validate([
-            'body' => 'required',
-        ]);
-
-        Answer::create([
-            'body' => $request->body,
-            'question_id' => $questionId,
-        ]);
-
-        return redirect()->route('questions.show', $questionId)
-            ->with('status', '回答を投稿しました。');
     }
 
     public function store(Request $request)
@@ -144,6 +127,7 @@ class QuestionController extends Controller
         return view('questions.show', compact('question'));
     }
 
+    // ★ここだけ残す（重複禁止）
     public function storeAnswer(Request $request, $questionId)
     {
         $request->validate([
@@ -151,8 +135,10 @@ class QuestionController extends Controller
         ]);
 
         Answer::create([
-            'body' => $request->body,
+            'body'        => $request->body,
             'question_id' => $questionId,
+            // 投稿者を紐づけたい場合は Answer モデル側の $fillable に user_id を用意して下の行を使う
+            // 'user_id'     => $request->user()->id,
         ]);
 
         return redirect()->route('questions.show', $questionId)
