@@ -5,6 +5,7 @@ use App\Models\Question;
 use App\Models\Tag;
 use App\Models\Answer;
 use Illuminate\Http\Request;
+use App\Models\Answer;
 
 class QuestionController extends Controller
 {
@@ -141,5 +142,20 @@ class QuestionController extends Controller
     {
         $question = Question::with('user','tags','answers.user')->findOrFail($id);
         return view('questions.show', compact('question'));
+    }
+
+    public function storeAnswer(Request $request, $questionId)
+    {
+        $request->validate([
+            'body' => 'required',
+        ]);
+
+        Answer::create([
+            'body' => $request->body,
+            'question_id' => $questionId,
+        ]);
+
+        return redirect()->route('questions.show', $questionId)
+            ->with('status', '回答を投稿しました。');
     }
 }
