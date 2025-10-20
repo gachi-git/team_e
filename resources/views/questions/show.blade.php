@@ -8,10 +8,14 @@
     <div class="max-w-3xl mx-auto p-6 space-y-8">
 
         {{-- 質問カード --}}
-        <div class="bg-white dark:bg-gray-700 shadow-md rounded-2xl p-6">
+        <div class="bg-white dark:bg-gray-700 shadow-md rounded-2xl p-6 relative">
             <h1 class="text-2xl font-semibold text-gray-900 dark:text-gray-100 mb-4">
                 {{ $question->title }}
             </h1>
+
+            <p class="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
+                {!! nl2br(e($question->body)) !!}
+            </p>
 
             @if($question->tags && $question->tags->isNotEmpty())
             <div class="mb-4 flex flex-wrap gap-2">
@@ -25,35 +29,32 @@
             </div>
             @endif
 
-            <p class="text-gray-700 dark:text-gray-300 mb-6 leading-relaxed">
-                {!! nl2br(e($question->body)) !!}
-            </p>
             <p class="text-sm text-gray-500 dark:text-gray-400">
                 投稿者: {{ optional($question->user)->name ?? '不明' }}
             </p>
-        </div>
 
-        <div class="mb-4 flex gap-4">
-            @can('update', $question)
-            <a href="{{ route('questions.edit', $question->id) }}"
-                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
-                編集
-            </a>
-            @endcan
-
-            @can('delete', $question)
-            <form action="{{ route('questions.destroy', $question->id) }}" method="POST"
-                onsubmit="return confirm('本当に削除しますか？');">
-                @csrf
-                @method('DELETE')
-                <button type="submit"
+            {{-- 編集・削除ボタン（右下配置） --}}
+            <div class="absolute bottom-4 right-4 flex gap-3">
+                @can('update', $question)
+                <a href="{{ route('questions.edit', $question->id) }}"
                     class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
-                    削除
-                </button>
-            </form>
-            @endcan
-        </div>
+                    編集
+                </a>
+                @endcan
 
+                @can('delete', $question)
+                <form action="{{ route('questions.destroy', $question->id) }}" method="POST"
+                    onsubmit="return confirm('本当に削除しますか？');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                        削除
+                    </button>
+                </form>
+                @endcan
+            </div>
+        </div>
 
         {{-- 回答投稿（トグル1つだけ） --}}
         <div x-data="{ open: false }" class="bg-white dark:bg-gray-700 shadow-md rounded-2xl p-6">
@@ -82,7 +83,7 @@
             </div>
         </div>
 
-        {{-- ✅ 回答一覧（ここに追加変更） --}}
+        {{-- ✅ 回答一覧 --}}
         <div class="bg-white dark:bg-gray-700 shadow-md rounded-2xl p-6 space-y-4">
             <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">回答一覧</h2>
 

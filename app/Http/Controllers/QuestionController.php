@@ -16,9 +16,11 @@ class QuestionController extends Controller
     public function index(Request $_request)
     {
         $keyword = $_request->input('keyword');
+        $filter  = $_request->input('filter', 'all'); // ← チェックボックスの状態（デフォルト: all）
 
-        $query = Question::query()->with('user', 'tags'); // N+1回避
+        $query = Question::query()->with('user', 'tags', 'answers'); // N+1回避
 
+        // 🔍 キーワード検索
         if (! empty($keyword)) {
             $query->where(function ($q) use ($keyword) {
                 $q->where('title', 'like', "%{$keyword}%")
@@ -26,9 +28,21 @@ class QuestionController extends Controller
             });
         }
 
-        $questions = $query->latest()->paginate(10);
+        // ✅ フィルタリング処理
+        if ($filter === 'unanswered') {
+            // 回答なし
+            $query->doesntHave('answers');
+        } elseif ($filter === 'solved') {
+            // ベストアンサーあり
+            $query->whereNotNull('best_answer_id');
+        }
 
-        return view('index', compact('questions', 'keyword'));
+        $questions = $query->latest()->paginate(10)->appends([
+            'keyword' => $keyword,
+            'filter'  => $filter,
+        ]);
+
+        return view('index', compact('questions', 'keyword', 'filter'));
     }
 
     public function create()
