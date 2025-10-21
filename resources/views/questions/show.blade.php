@@ -17,6 +17,7 @@
                 {!! nl2br(e($question->body)) !!}
             </p>
 
+
             @if($question->tags && $question->tags->isNotEmpty())
             <div class="mb-4 flex flex-wrap gap-2">
                 @foreach ($question->tags as $tag)
@@ -31,6 +32,10 @@
 
             <p class="text-sm text-gray-500 dark:text-gray-400">
                 投稿者: {{ optional($question->user)->name ?? '不明' }}
+            </p>
+
+            <p class= "text-sm text-gray-400 dark:text-gray-400 mb-2">
+                閲覧数: {{ $question->views }} 回
             </p>
 
             {{-- 編集・削除ボタン（右下配置） --}}
