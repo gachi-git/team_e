@@ -140,38 +140,21 @@ class QuestionController extends Controller
         return $s;
     }
 
-    public function show(Request $request,$id)
+    public function show(Request $request, $id)
     {
         $question = Question::with('user', 'tags', 'answers.user')->findOrFail($id);
-        
+
         // セッションを使って同じ人が何度も見ても1回だけカウントされるようにする
         $viewedKey = 'viewed_question_' . $question->id;
 
         if (!$request->session()->has($viewedKey)) {
-        $question->increment('views'); // 閲覧数を +1
-        $request->session()->put($viewedKey, true);
+            $question->increment('views'); // 閲覧数を +1
+            $request->session()->put($viewedKey, true);
         }
-        
+
         return view('questions.show', compact('question'));
     }
 
-    // ★ここだけ残す（重複禁止）
-    public function storeAnswer(Request $request, $questionId)
-    {
-        $request->validate([
-            'body' => 'required',
-        ]);
-
-        Answer::create([
-            'body'        => $request->body,
-            'question_id' => $questionId,
-            // 投稿者を紐づけたい場合は Answer モデル側の $fillable に user_id を用意して下の行を使う
-            // 'user_id'     => $request->user()->id,
-        ]);
-
-        return redirect()->route('questions.show', $questionId)
-            ->with('status', '回答を投稿しました。');
-    }
 
     // 編集画面表示
     public function edit(Question $question)
@@ -225,5 +208,28 @@ class QuestionController extends Controller
         return redirect()
             ->route('questions.show', $questionId)
             ->with('status', 'ベストアンサーを設定しました。');
+    }
+
+
+    public function storeAnswer(Request $request, $questionId)
+    {
+        $request->validate([
+            'body' => 'required',
+        ]);
+
+        $answer = Answer::create([
+            'body'        => $request->body,
+            'question_id' => $questionId,
+            'user_id'     => $request->user()->id,
+        ]);
+
+        // 🔔 通知送信（質問者へ）
+        $question = Question::findOrFail($questionId);
+        if ($question->user_id !== $request->user()->id) {
+            $question->user->notify(new \App\Notifications\NewAnswerNotification($answer));
+        }
+
+        return redirect()->route('questions.show', $questionId)
+            ->with('status', '回答を投稿しました。');
     }
 }
