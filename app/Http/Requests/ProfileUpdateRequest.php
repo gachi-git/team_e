@@ -25,6 +25,14 @@ class ProfileUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
+            'university_id' => ['nullable', 'exists:universities,id'],
+        ];
+    }
+    
+    public function messages(): array
+    {
+        return [
+            'university_id.exists' => '選択された大学が存在しません。',
         ];
     }
 }

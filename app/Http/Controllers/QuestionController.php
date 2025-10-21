@@ -1,29 +1,48 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Question;
 use App\Models\Tag;
 use App\Models\Answer;
 use Illuminate\Http\Request;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class QuestionController extends Controller
 {
+
+    use AuthorizesRequests;
+
     public function index(Request $_request)
     {
         $keyword = $_request->input('keyword');
+        $filter  = $_request->input('filter', 'all'); // ← チェックボックスの状態（デフォルト: all）
 
-        $query = Question::query()->with('user','tags'); // N+1回避
+        $query = Question::query()->with('user', 'tags', 'answers'); // N+1回避
 
+        // 🔍 キーワード検索
         if (! empty($keyword)) {
-            $query->where(function($q) use($keyword) {
-                $q->where('title','like',"%{$keyword}%")
-                    ->orWhere('body','like',"%{$keyword}%");
+            $query->where(function ($q) use ($keyword) {
+                $q->where('title', 'like', "%{$keyword}%")
+                    ->orWhere('body', 'like', "%{$keyword}%");
             });
         }
 
-        $questions = $query->latest()->paginate(10);
+        // ✅ フィルタリング処理
+        if ($filter === 'unanswered') {
+            // 回答なし
+            $query->doesntHave('answers');
+        } elseif ($filter === 'solved') {
+            // ベストアンサーあり
+            $query->whereNotNull('best_answer_id');
+        }
 
-        return view('index', compact('questions', 'keyword'));
+        $questions = $query->latest()->paginate(10)->appends([
+            'keyword' => $keyword,
+            'filter'  => $filter,
+        ]);
+
+        return view('index', compact('questions', 'keyword', 'filter'));
     }
 
     public function create()
@@ -34,9 +53,9 @@ class QuestionController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title'    => ['required','max:255'],
+            'title'    => ['required', 'max:255'],
             'body'     => ['required'],
-            'hashtags' => ['nullable','string'],
+            'hashtags' => ['nullable', 'string'],
         ]);
 
         // 投稿者
@@ -63,7 +82,7 @@ class QuestionController extends Controller
             }
         }
 
-        return redirect()->route('questions.index')->with('status','質問を投稿しました。');
+        return redirect()->route('questions.index')->with('status', '質問を投稿しました。');
     }
 
     // 連結(#九州大学#理学部#登山部)／スペース／カンマ区切りすべて対応
@@ -92,7 +111,7 @@ class QuestionController extends Controller
         }
 
         // 後処理：トリム・空除去・長さ制限・重複除去
-        $labels = array_values(array_unique(array_filter(array_map(function($x){
+        $labels = array_values(array_unique(array_filter(array_map(function ($x) {
             $x = trim($x);
             if ($x === '') return '';
             return mb_substr($x, 0, 30); // 30文字上限
@@ -121,9 +140,18 @@ class QuestionController extends Controller
         return $s;
     }
 
-    public function show($id)
+    public function show(Request $request,$id)
     {
-        $question = Question::with('user','tags','answers.user')->findOrFail($id);
+        $question = Question::with('user', 'tags', 'answers.user')->findOrFail($id);
+        
+        // セッションを使って同じ人が何度も見ても1回だけカウントされるようにする
+        $viewedKey = 'viewed_question_' . $question->id;
+
+        if (!$request->session()->has($viewedKey)) {
+        $question->increment('views'); // 閲覧数を +1
+        $request->session()->put($viewedKey, true);
+        }
+        
         return view('questions.show', compact('question'));
     }
 
@@ -143,5 +171,59 @@ class QuestionController extends Controller
 
         return redirect()->route('questions.show', $questionId)
             ->with('status', '回答を投稿しました。');
+    }
+
+    // 編集画面表示
+    public function edit(Question $question)
+    {
+        $this->authorize('update', $question); // ポリシーで本人確認
+        return view('questions.edit', compact('question'));
+    }
+
+    // 更新処理
+    public function update(Request $request, Question $question)
+    {
+        $this->authorize('update', $question);
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'body' => 'required|string',
+        ]);
+
+        $question->update($request->only('title', 'body'));
+
+        return redirect()->route('questions.show', $question)->with('success', '質問を更新しました');
+    }
+
+    // 削除処理
+    public function destroy(Question $question)
+    {
+        $this->authorize('delete', $question);
+
+        $question->delete();
+
+        return redirect()->route('questions.index')->with('success', '質問を削除しました');
+    }
+
+
+    /**
+     * ベストアンサーに設定
+     */
+    public function markBestAnswer(Request $request, $questionId, $answerId)
+    {
+        $question = Question::findOrFail($questionId);
+
+        // 質問者本人のみ許可
+        if ($request->user()->id !== $question->user_id) {
+            abort(403, 'あなたはこの質問の投稿者ではありません。');
+        }
+
+        // ベストアンサーを設定
+        $question->best_answer_id = $answerId;
+        $question->save();
+
+        return redirect()
+            ->route('questions.show', $questionId)
+            ->with('status', 'ベストアンサーを設定しました。');
     }
 }

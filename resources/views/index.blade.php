@@ -23,21 +23,52 @@
                 </a>
             </div>
 
-            <!-- 検索フォーム -->
-            <form action="{{ route('questions.index') }}" method="GET" class="mb-6 flex gap-2">
-                <input
-                    type="text"
-                    name="keyword"
-                    value="{{ $keyword ?? '' }}"
-                    placeholder="キーワードで検索してみよう"
-                    class="border border-gray-300 rounded-lg p-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 text-gray-800 bg-white placeholder-gray-400"
-                >
-                <button
-                    type="submit"
-                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
-                >
-                    検索
-                </button>
+            <!-- 検索フォーム + チェックボックス -->
+            <form action="{{ route('questions.index') }}" method="GET"
+                  class="mb-6 flex flex-wrap gap-3 items-center"
+                  x-data="{ selected: '{{ $filter ?? 'all' }}' }">
+                <div class="flex items-center gap-3">
+                    <!-- ✅ チェックボックス群（1つのみ選択可能） -->
+                    <label class="flex items-center gap-1 text-gray-700 dark:text-gray-300 text-sm">
+                        <input type="radio" name="filter" value="all"
+                               x-model="selected"
+                               class="rounded text-indigo-600 focus:ring-indigo-500"
+                               @change="$el.form.submit()">
+                        すべて
+                    </label>
+
+                    <label class="flex items-center gap-1 text-gray-700 dark:text-gray-300 text-sm">
+                        <input type="radio" name="filter" value="unanswered"
+                               x-model="selected"
+                               class="rounded text-indigo-600 focus:ring-indigo-500"
+                               @change="$el.form.submit()">
+                        回答なし
+                    </label>
+
+                    <label class="flex items-center gap-1 text-gray-700 dark:text-gray-300 text-sm">
+                        <input type="radio" name="filter" value="solved"
+                               x-model="selected"
+                               class="rounded text-indigo-600 focus:ring-indigo-500"
+                               @change="$el.form.submit()">
+                        解決済み
+                    </label>
+                </div>
+
+                <div class="flex gap-2">
+                    <input
+                        type="text"
+                        name="keyword"
+                        value="{{ $keyword ?? '' }}"
+                        placeholder="キーワードで検索してみよう"
+                        class="border border-gray-300 rounded-lg p-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 text-gray-800 bg-white placeholder-gray-400"
+                    >
+                    <button
+                        type="submit"
+                        class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
+                    >
+                        検索
+                    </button>
+                </div>
             </form>
 
             <!-- 質問一覧 -->
@@ -45,12 +76,21 @@
                 @forelse ($questions as $question)
                     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-md hover:shadow-xl transition p-6 flex flex-col justify-between">
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2 line-clamp-2">
-                                <a href="{{ route('questions.show', $question) }}"
-                                   class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">
-                                    {{ $question->title }}
-                                </a>
-                            </h2>
+                            {{-- ✅ タイトル行に「解決済み」バッジを追加 --}}
+                            <div class="flex items-center justify-between mb-2">
+                                <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100 line-clamp-2">
+                                    <a href="{{ route('questions.show', $question) }}"
+                                       class="hover:text-indigo-600 dark:hover:text-indigo-400 transition">
+                                        {{ $question->title }}
+                                    </a>
+                                </h2>
+
+                                @if($question->best_answer_id)
+                                    <span class="inline-flex items-center text-xs font-semibold text-green-700 bg-green-100 dark:bg-green-900/40 dark:text-green-300 px-2.5 py-0.5 rounded-full">
+                                        ✅ 解決済み
+                                    </span>
+                                @endif
+                            </div>
 
                             <p class="text-sm text-gray-600 dark:text-gray-300 line-clamp-3 mb-4">
                                 {{ Str::limit(strip_tags($question->body), 120) }}
