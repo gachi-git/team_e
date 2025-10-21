@@ -140,9 +140,18 @@ class QuestionController extends Controller
         return $s;
     }
 
-    public function show($id)
+    public function show(Request $request,$id)
     {
         $question = Question::with('user', 'tags', 'answers.user')->findOrFail($id);
+        
+        // セッションを使って同じ人が何度も見ても1回だけカウントされるようにする
+        $viewedKey = 'viewed_question_' . $question->id;
+
+        if (!$request->session()->has($viewedKey)) {
+        $question->increment('views'); // 閲覧数を +1
+        $request->session()->put($viewedKey, true);
+        }
+        
         return view('questions.show', compact('question'));
     }
 
