@@ -26,3 +26,8 @@ return new class extends Migration
         Schema::dropIfExists('universities');
     }
 };
+
+Schema::table('universities', function (Blueprint $table) {
+    $table->string('name_kana')->nullable()->after('name');
+    $table->string('type')->nullable()->after('name_kana'); // 国立/公立/私立 など
+});
