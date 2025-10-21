@@ -155,21 +155,6 @@ class QuestionController extends Controller
         return view('questions.show', compact('question'));
     }
 
-    public function storeAnswer(Request $request, $questionId)
-    {
-        $request->validate([
-            'body' => 'required',
-        ]);
-
-        Answer::create([
-            'body'        => $request->body,
-            'question_id' => $questionId,
-            'user_id'     => $request->user()->id, // ← 追加
-        ]);
-
-        return redirect()->route('questions.show', $questionId)
-            ->with('status', '回答を投稿しました。');
-    }
 
     // 編集画面表示
     public function edit(Question $question)
@@ -223,5 +208,28 @@ class QuestionController extends Controller
         return redirect()
             ->route('questions.show', $questionId)
             ->with('status', 'ベストアンサーを設定しました。');
+    }
+
+
+    public function storeAnswer(Request $request, $questionId)
+    {
+        $request->validate([
+            'body' => 'required',
+        ]);
+
+        $answer = Answer::create([
+            'body'        => $request->body,
+            'question_id' => $questionId,
+            'user_id'     => $request->user()->id,
+        ]);
+
+        // 🔔 通知送信（質問者へ）
+        $question = Question::findOrFail($questionId);
+        if ($question->user_id !== $request->user()->id) {
+            $question->user->notify(new \App\Notifications\NewAnswerNotification($answer));
+        }
+
+        return redirect()->route('questions.show', $questionId)
+            ->with('status', '回答を投稿しました。');
     }
 }
