@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\NotificationController;
 
 // Public pages
 Route::get('/', fn () => view('welcome'));
@@ -33,5 +34,10 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/questions/{question}', [QuestionController::class, 'show'])
     ->name('questions.show')
     ->whereNumber('question');
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
+});
 
 require __DIR__.'/auth.php';
