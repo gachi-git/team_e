@@ -17,6 +17,7 @@ class QuestionController extends Controller
     {
         $keyword = $_request->input('keyword');
         $filter  = $_request->input('filter', 'all'); // ← チェックボックスの状態（デフォルト: all）
+        $tag     = $_request->input('tag'); // ← ハッシュタグフィルター
 
         $query = Question::query()->with('user', 'tags', 'answers'); // N+1回避
 
@@ -25,6 +26,13 @@ class QuestionController extends Controller
             $query->where(function ($q) use ($keyword) {
                 $q->where('title', 'like', "%{$keyword}%")
                     ->orWhere('body', 'like', "%{$keyword}%");
+            });
+        }
+
+        // 🏷️ ハッシュタグフィルター
+        if (! empty($tag)) {
+            $query->whereHas('tags', function ($q) use ($tag) {
+                $q->where('label', $tag)->orWhere('key', $tag);
             });
         }
 
@@ -40,9 +48,16 @@ class QuestionController extends Controller
         $questions = $query->latest()->paginate(10)->appends([
             'keyword' => $keyword,
             'filter'  => $filter,
+            'tag'     => $tag,
         ]);
 
-        return view('index', compact('questions', 'keyword', 'filter'));
+        // 人気のタグを取得（フィルター用）
+        $popularTags = Tag::withCount('questions')
+            ->orderBy('questions_count', 'desc')
+            ->limit(20)
+            ->get();
+
+        return view('index', compact('questions', 'keyword', 'filter', 'tag', 'popularTags'));
     }
 
     public function create()

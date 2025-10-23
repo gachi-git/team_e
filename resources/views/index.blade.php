@@ -54,7 +54,7 @@
                     </label>
                 </div>
 
-                <div class="flex gap-2">
+                <div class="flex gap-2 flex-wrap">
                     <input
                         type="text"
                         name="keyword"
@@ -62,12 +62,31 @@
                         placeholder="キーワードで検索してみよう"
                         class="border border-gray-300 rounded-lg p-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 text-gray-800 bg-white placeholder-gray-400"
                     >
+                    <select
+                        name="tag"
+                        class="border border-gray-300 rounded-lg p-2 w-64 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 text-gray-400 bg-white"
+                        onchange="this.form.submit()"
+                        style="color: #9ca3af;"
+                    >
+                        <option value="" class="text-gray-400">ハッシュタグで絞り込み</option>
+                        @foreach ($popularTags as $popularTag)
+                            <option value="{{ $popularTag->label }}" {{ ($tag ?? '') == $popularTag->label ? 'selected' : '' }} class="text-gray-800">
+                                #{{ $popularTag->label }} ({{ $popularTag->questions_count }})
+                            </option>
+                        @endforeach
+                    </select>
                     <button
                         type="submit"
                         class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition"
                     >
                         検索
                     </button>
+                    @if($tag)
+                        <a href="{{ route('questions.index', ['keyword' => $keyword, 'filter' => $filter]) }}"
+                           class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition">
+                            タグクリア
+                        </a>
+                    @endif
                 </div>
             </form>
 
