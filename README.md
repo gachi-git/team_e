@@ -31,10 +31,8 @@
 - **バックエンド**: Laravel 12 (PHP 8.4)
 - **フロントエンド**: Blade テンプレート + Tailwind CSS + Alpine.js
 - **データベース**: MySQL 8.0
-- **キャッシュ**: Redis
 - **認証**: Laravel Breeze
-- **テスト**: Pest (PHP Testing Framework)
-- **メール**: Mailpit (開発環境)
+- **テスト**: Pest（12テストファイル、主要機能の動作確認済み）
 - **コンテナ**: Docker + Laravel Sail
 
 ## 環境構築
@@ -46,9 +44,7 @@
 ### サービス構成
 - **laravel.test**: メインのLaravelアプリケーション (http://localhost)
 - **mysql**: MySQL 8.0データベース (ポート: 3306)
-- **redis**: Redisキャッシュサーバー (ポート: 6379)
 - **phpmyadmin**: データベース管理 (http://localhost:8080)
-- **selenium**: ブラウザテスト用
 
 ### セットアップ手順
 
@@ -74,24 +70,6 @@ cd team_e
 ```
 
 
-### コンテナの管理
-```bash
-# 起動
-./vendor/bin/sail up -d
-
-# 停止
-./vendor/bin/sail down
-
-
-### テストの実行
-```bash
-./vendor/bin/sail composer run test
-```
-
-### Artisanコマンド
-```bash
-./vendor/bin/sail artisan <command>
-```
 
 ## アクセスURL
 
@@ -99,13 +77,3 @@ cd team_e
 - **phpMyAdmin**: http://localhost:8080
 
 
-## データベース構造
-
-### 主要テーブル
-- `users`: ユーザー情報（university_id含む）
-- `universities`: 大学情報（名前、カナ、種別）
-- `questions`: 質問データ（タイトル、本文、閲覧数、best_answer_id）
-- `answers`: 回答データ（本文、question_id、user_id）
-- `tags`: ハッシュタグマスター
-- `question_tag`: 質問とタグの多対多関係
-- `notifications`: 通知データ（データベース通知）
