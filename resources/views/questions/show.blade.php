@@ -17,7 +17,6 @@
                 {!! nl2br(e($question->body)) !!}
             </p>
 
-
             @if($question->tags && $question->tags->isNotEmpty())
             <div class="mb-4 flex flex-wrap gap-2">
                 @foreach ($question->tags as $tag)
@@ -34,7 +33,7 @@
                 投稿者: {{ optional($question->user)->name ?? '不明' }}
             </p>
 
-            <p class= "text-sm text-gray-400 dark:text-gray-400 mb-2">
+            <p class="text-sm text-gray-400 dark:text-gray-400 mb-2">
                 閲覧数: {{ $question->views }} 回
             </p>
 
@@ -61,13 +60,23 @@
             </div>
         </div>
 
-        {{-- 回答投稿（トグル1つだけ） --}}
+        {{-- 回答 or 返信投稿（投稿者だけ切り替え） --}}
         <div x-data="{ open: false }" class="bg-white dark:bg-gray-700 shadow-md rounded-2xl p-6">
-            <button
-                @click="open = !open"
-                class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
-                回答する
-            </button>
+            @if(Auth::check() && Auth::id() === $question->user_id)
+                {{-- 投稿者本人には返信ボタンを表示 --}}
+                <button
+                    @click="open = !open"
+                    class="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition">
+                    返信する
+                </button>
+            @else
+                {{-- それ以外は回答ボタン --}}
+                <button
+                    @click="open = !open"
+                    class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                    回答する
+                </button>
+            @endif
 
             <div x-show="open" x-transition x-cloak class="mt-4">
                 <form action="{{ route('answers.store', $question->id) }}" method="POST" class="space-y-4">
@@ -78,11 +87,11 @@
                                 border border-gray-300 dark:border-gray-600
                                 text-gray-900 dark:text-gray-100
                                 bg-white dark:bg-gray-700"
-                        placeholder="ここに回答を入力してください..."></textarea>
+                        placeholder="ここに{{ Auth::check() && Auth::id() === $question->user_id ? '返信' : '回答' }}を入力してください..."></textarea>
 
                     <button type="submit"
-                        class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition">
-                        回答を投稿
+                        class="px-4 py-2 {{ Auth::check() && Auth::id() === $question->user_id ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-600 hover:bg-green-700' }} text-white rounded-lg transition">
+                        {{ Auth::check() && Auth::id() === $question->user_id ? '返信を投稿' : '回答を投稿' }}
                     </button>
                 </form>
             </div>
@@ -93,7 +102,10 @@
             <h2 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4">回答一覧</h2>
 
             @forelse ($question->answers as $answer)
-                <div class="p-4 mb-4 bg-white dark:bg-gray-800 rounded-2xl shadow transition hover:shadow-lg">
+                {{-- 投稿者の回答は黄色カード、それ以外は白カード --}}
+                <div class="p-4 mb-4 rounded-2xl shadow transition hover:shadow-lg
+                    {{ $answer->user_id === $question->user_id ? 'bg-yellow-50 dark:bg-yellow-900/40' : 'bg-white dark:bg-gray-800' }}">
+                    
                     <p class="text-gray-900 dark:text-gray-100 whitespace-pre-line">{{ $answer->body }}</p>
                     <p class="text-sm text-gray-500 mt-2">
                         投稿日時: {{ $answer->created_at->format('Y/m/d H:i') }}

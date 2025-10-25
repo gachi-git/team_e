@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UniversityController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\NotificationController;
 
 
 Route::get('/', function(){
@@ -41,5 +42,10 @@ Route::post(
     '/questions/{question}/answers/{answer}/best',
     [QuestionController::class, 'markBestAnswer']
 )->middleware('auth')->name('answers.best');
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/notifications/{id}/read', [NotificationController::class, 'read'])->name('notifications.read');
+});
 
 require __DIR__.'/auth.php';
