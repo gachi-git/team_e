@@ -11,12 +11,13 @@ class NotificationController extends Controller
     {
         $notification = Auth::user()->notifications()->findOrFail($id);
 
-        // 既読にする
+        // 通知を既読にする。
         $notification->markAsRead();
 
         // 通知データに保存してある質問IDを取得
         $questionId = $notification->data['question_id'] ?? null;
 
+        //質問詳細へ遷移。
         if ($questionId) {
             return redirect()->route('questions.show', $questionId);
         }
