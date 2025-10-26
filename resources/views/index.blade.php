@@ -29,6 +29,9 @@
                   x-data="{ selected: '{{ $filter ?? 'all' }}' }">
                 <div class="flex items-center gap-3">
                     <!-- ✅ チェックボックス群（1つのみ選択可能） -->
+                    <!--<input type="radio" name="filter" value="..."> で絞り込みを選択。
+                    Alpine.jsのx-model="selected"で選択状態を保持。
+                    @change="$el.form.submit()"で自動送信。-->
                     <label class="flex items-center gap-1 text-gray-700 dark:text-gray-300 text-sm">
                         <input type="radio" name="filter" value="all"
                                x-model="selected"

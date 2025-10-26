@@ -16,12 +16,13 @@ class NewAnswerNotification extends Notification
     {
         $this->answer = $answer;
     }
-
+//via()で通知チャンネルをdatabaseに指定。
     public function via($notifiable)
     {
         return ['database'];
     }
-
+//toArray()で通知内容を定義。
+//通知テーブルに「あなたの質問『〇〇』に新しい回答が投稿されました」というメッセージを保存。
     public function toArray($notifiable)
     {
         return [
